@@ -11,6 +11,12 @@ const appReducer = (state, action) => {
                     completed: false
                 }
             ];
+        case "complete":
+            return state.map(item => {
+                return item.id === action.payload
+                    ? { ...item, completed: !item.completed }
+                    : item;
+            })
         case "delete":
             return state.filter(item => item.id !== action.payload);
         default:
@@ -43,7 +49,7 @@ function TodoItem({ id, text, completed }) {
     const dispatch = useContext(Context);
     return (
         <div>
-            <input type="checkbox" checked={completed} />
+            <input onChange={() => dispatch({ type: "complete", payload: id })} type="checkbox" checked={completed} />
             <input type="text" defaultValue={text} />
             <button onClick={() => dispatch({ type: "delete", payload: id })}>
                 Delete
