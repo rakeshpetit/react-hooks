@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useEffect, useContext, useReducer } from "react";
 
 const appReducer = (state, action) => {
     switch (action.type) {
@@ -16,7 +16,9 @@ const appReducer = (state, action) => {
                 return item.id === action.payload
                     ? { ...item, completed: !item.completed }
                     : item;
-            })
+            });
+        case "reset":
+            return action.payload
         case "delete":
             return state.filter(item => item.id !== action.payload);
         default:
@@ -28,6 +30,13 @@ const Context = createContext();
 
 function Todos() {
     const [state, dispatch] = useReducer(appReducer, []);
+    useEffect(() => {
+        localStorage.setItem("todoData", JSON.stringify(state));
+    }, [state]);
+    useEffect(() => {
+        const data = localStorage.getItem("todoData");
+        dispatch({ type: "reset", payload: JSON.parse(data) });
+    }, []);
     return (
         <Context.Provider value={dispatch}>
             <div>
@@ -49,7 +58,11 @@ function TodoItem({ id, text, completed }) {
     const dispatch = useContext(Context);
     return (
         <div>
-            <input onChange={() => dispatch({ type: "complete", payload: id })} type="checkbox" checked={completed} />
+            <input
+                onChange={() => dispatch({ type: "complete", payload: id })}
+                type="checkbox"
+                checked={completed}
+            />
             <input type="text" defaultValue={text} />
             <button onClick={() => dispatch({ type: "delete", payload: id })}>
                 Delete
